@@ -12,9 +12,11 @@ export const OPENAI_EMBED_MODEL =
 // Ollama
 export const OLLAMA_BASE_URL =
   process.env.OLLAMA_BASE_URL || "http://localhost:11434";
-export const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL || "llama3.1:8b";
+export const OLLAMA_CHAT_MODEL =
+  process.env.OLLAMA_CHAT_MODEL ||
+  "hf.co/unsloth/Qwen3-4B-Instruct-2507-GGUF:Q8_K_XL";
 export const OLLAMA_EMBED_MODEL =
-  process.env.OLLAMA_EMBED_MODEL || "nomic-embed-text:latest";
+  process.env.OLLAMA_EMBED_MODEL || "embeddinggemma:300m";
 
 // RAG params
 const intFromEnv = (val: string | undefined, def: number) => {
@@ -25,10 +27,3 @@ const intFromEnv = (val: string | undefined, def: number) => {
 export const RAG_CHUNK_SIZE = intFromEnv(process.env.RAG_CHUNK_SIZE, 1000);
 export const RAG_CHUNK_OVERLAP = intFromEnv(process.env.RAG_CHUNK_OVERLAP, 150);
 export const RAG_TOP_K = intFromEnv(process.env.RAG_TOP_K, 5);
-
-// ChromaDB
-export const CHROMA_URL = process.env.CHROMA_URL || 'http://localhost:8000';
-export const CHROMA_COLLECTION = process.env.CHROMA_COLLECTION || 'rag-docs';
-export const CHROMA_API_KEY = process.env.CHROMA_API_KEY || '';
-export const CHROMA_TENANT = process.env.CHROMA_TENANT || '';
-export const CHROMA_DATABASE = process.env.CHROMA_DATABASE || '';

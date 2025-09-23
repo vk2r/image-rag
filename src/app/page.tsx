@@ -14,7 +14,6 @@ export default function Home() {
   const [contexts, setContexts] = useState<any[]>([]);
   const uploadingRef = useRef<boolean>(false);
   const [provider, setProvider] = useState<"openai" | "ollama">("openai");
-  const [db, setDb] = useState<"json" | "chroma">("json");
   const [docs, setDocs] = useState<
     Array<{ name: string; docType: string; chunks: number }>
   >([]);
@@ -24,10 +23,9 @@ export default function Home() {
   } | null>(null);
 
   // Methods
-  async function loadDocs(currentProvider = provider, currentDb = db) {
+  async function loadDocs(currentProvider = provider) {
     const params = new URLSearchParams({
       provider: currentProvider,
-      db: currentDb,
     });
     const res = await fetch(`/api/docs?${params.toString()}`, {
       method: "GET",
@@ -48,7 +46,6 @@ export default function Home() {
       const form = new FormData();
       Array.from(files).forEach((f) => form.append("files", f));
       form.append("provider", provider);
-      form.append("db", db);
       const res = await fetch("/api/ingest", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Error de ingestión");
@@ -56,7 +53,7 @@ export default function Home() {
         `Procesados ${data.filesProcessed} archivos, ${data.chunks} chunks, almacenados ${data.stored}`
       );
       // refrescar listado
-      loadDocs(provider, db);
+      loadDocs(provider);
     } catch (e: any) {
       setIngestStatus(`Error: ${e.message}`);
     } finally {
@@ -68,7 +65,7 @@ export default function Home() {
     setAnswer("");
     setContexts([]);
     if (!question.trim()) return;
-    const body: any = { question, topK, provider, db };
+    const body: any = { question, topK, provider };
     if (selectedDoc) body.doc = selectedDoc;
     const res = await fetch("/api/ask", {
       method: "POST",
@@ -88,13 +85,13 @@ export default function Home() {
   useEffect(() => {
     setSelectedDoc(null);
     loadDocs();
-  }, [provider, db]);
+  }, [provider]);
 
   return (
     <div className="min-h-screen w-full bg-white text-black">
       <div className="max-w-5xl mx-auto p-6 space-y-8">
         <header className="flex items-center justify-between gap-4 flex-wrap">
-          <h1 className="text-2xl font-bold">RAG en Next.js</h1>
+          <h1 className="text-2xl font-bold">RAG</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <label htmlFor="provider" className="text-sm opacity-80">
@@ -110,20 +107,6 @@ export default function Home() {
               >
                 <option value="openai">OpenAI</option>
                 <option value="ollama">Ollama</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="db" className="text-sm opacity-80">
-                Base de datos
-              </label>
-              <select
-                id="db"
-                className="rounded-md border border-zinc-300 bg-white p-2 text-sm"
-                value={db}
-                onChange={(e) => setDb(e.target.value as "json" | "chroma")}
-              >
-                <option value="chroma">ChromaDB</option>
-                <option value="json">JSON local</option>
               </select>
             </div>
           </div>
@@ -155,8 +138,7 @@ export default function Home() {
         <section className="rounded-xl border border-zinc-200 p-6 space-y-4">
           <h2 className="text-lg font-semibold">3) Documentos almacenados</h2>
           <p className="text-sm text-zinc-600">
-            Mostrando en {db === "chroma" ? "ChromaDB" : "JSON local"} para
-            proveedor {provider.toUpperCase()}
+            Mostrando en JSON local para proveedor {provider.toUpperCase()}
           </p>
           {docs.length === 0 ? (
             <p className="text-sm opacity-80">No hay documentos aún.</p>

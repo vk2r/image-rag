@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## RAG en Next.js (Español)
 
-## Getting Started
+Este proyecto implementa un flujo RAG minimalista con Next.js (TypeScript) y una interfaz web para:
 
-First, run the development server:
+- Subir documentos (PDF/TXT/MD) y fragmentarlos (chunking).
+- Generar embeddings con OpenAI u Ollama.
+- Almacenar embeddings en un VectorStore basado en JSON local.
+- Realizar preguntas y recuperar contexto relevante.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Requisitos
+
+- Node.js 18+
+- Cuenta y clave de API de OpenAI si usas el proveedor `openai` (recomendado por defecto).
+
+### Variables de entorno (`.env.local`)
+
+Ejemplo mínimo:
+
+```
+RAG_PROVIDER=ollama
+
+# OpenAI (requerido si usas openai)
+OPENAI_API_KEY=sk-...
+OPENAI_CHAT_MODEL=gpt-4o-mini
+OPENAI_EMBED_MODEL=text-embedding-3-small
+
+# Ollama (opcional si usas ollama)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_CHAT_MODEL=hf.co/unsloth/Qwen3-4B-Instruct-2507-GGUF:Q8_K_XL
+OLLAMA_EMBED_MODEL=embeddinggemma:300m
+
+# Parámetros RAG (opcionales)
+RAG_CHUNK_SIZE=1000
+RAG_CHUNK_OVERLAP=150
+RAG_TOP_K=5
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El proveedor por defecto es `openai`. Cambia `RAG_PROVIDER` a `ollama` si prefieres ejecutar localmente con Ollama.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Ejecutar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm install
+npm run dev
+```
 
-## Learn More
+Abre `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+### UI y Endpoints
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- UI principal: `src/app/page.tsx`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  - Selector de proveedor (`openai`/`ollama`)
+  - Subida de archivos y estado de ingestión
+  - Listado de documentos y consulta de preguntas
 
-## Deploy on Vercel
+- Endpoints API:
+  - `POST /api/ingest` — Ingesta de documentos (FormData: `files[]`, `provider`)
+  - `GET  /api/docs` — Lista documentos por proveedor (`provider` como query param)
+  - `POST /api/ask` — Preguntas con `question`, `topK`, `provider`, y opcional `doc`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Almacenamiento Vectorial (JSON local)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Los embeddings se guardan en archivos JSON por proveedor en `data/`:
+
+- `data/vector_store-openai.json`
+- `data/vector_store-ollama.json`
+
+Esto facilita respaldos y depuración. No se usa ninguna base de datos externa por defecto.
+
+### Estructura relevante
+
+- `src/app/api/ingest/route.ts` — Ingesta de documentos, chunking y guardado en JSON.
+- `src/app/api/ask/route.ts` — Búsqueda por similitud y respuesta con contexto.
+- `src/app/api/docs/route.ts` — Listado de documentos disponibles.
+- `src/lib/providers/` — Proveedores de chat/embeddings (OpenAI/Ollama).
+- `src/lib/store/vectorStore.ts`— Implementación del VectorStore en JSON.
+
+### Problemas comunes
+
+- Si ves errores de clave al usar OpenAI, asegúrate de definir `OPENAI_API_KEY` en `.env.local` y reiniciar el servidor.
+- Si usas Ollama, verifica que el servidor esté activo en `OLLAMA_BASE_URL` y que los modelos configurados estén disponibles localmente.
