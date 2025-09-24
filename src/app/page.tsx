@@ -23,7 +23,7 @@ export default function Home() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [ingestStatus, setIngestStatus] = useState<string>("");
   const [question, setQuestion] = useState("");
-  const [topK, setTopK] = useState<number>(10);
+  const [topK, setTopK] = useState<number>(Number(process.env.RAG_TOP_K || 10));
   const [answer, setAnswer] = useState<string>("");
   const [contexts, setContexts] = useState<any[]>([]);
   const [asking, setAsking] = useState<boolean>(false);
@@ -283,7 +283,6 @@ export default function Home() {
                 id="topK"
                 type="number"
                 min={1}
-                max={20}
                 className="w-20"
                 value={topK}
                 onChange={(e) =>
