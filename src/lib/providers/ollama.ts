@@ -1,23 +1,32 @@
-import OpenAI from 'openai';
-import { OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, OLLAMA_EMBED_MODEL } from '@/lib/config';
-import type { ChatProvider, EmbeddingsProvider, ChatMessage } from '@/lib/providers';
+import OpenAI from "openai";
+import {
+  OLLAMA_BASE_URL,
+  OLLAMA_CHAT_MODEL,
+  OLLAMA_EMBED_MODEL,
+} from "@/lib/config";
+import type {
+  ChatProvider,
+  EmbeddingsProvider,
+  ChatMessage,
+} from "@/lib/providers";
 
 // Usamos el SDK de OpenAI apuntando al endpoint OpenAI-compatible de Ollama
-const baseURL = `${OLLAMA_BASE_URL.replace(/\/$/, '')}/v1`;
-const client = new OpenAI({ baseURL, apiKey: 'ollama' });
+const baseURL = `${OLLAMA_BASE_URL.replace(/\/$/, "")}/v1`;
+const client = new OpenAI({ baseURL, apiKey: "ollama" });
 
 const embeddings: EmbeddingsProvider = {
   async embed(texts: string[]) {
     const out: number[][] = [];
     for (const t of texts) {
-      // Algunos servidores OpenAI-compatibles de Ollama no aceptan arrays en "input"
-      // por lo que enviamos 1 texto por request.
       let lastErr: any = null;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const res = await client.embeddings.create({ model: OLLAMA_EMBED_MODEL, input: t });
+          const res = await client.embeddings.create({
+            model: OLLAMA_EMBED_MODEL,
+            input: t,
+          });
           const emb = res.data?.[0]?.embedding as number[] | undefined;
-          if (!emb) throw new Error('Respuesta de embeddings vacía');
+          if (!emb) throw new Error("Respuesta de embeddings vacía");
           out.push(emb);
           lastErr = null;
           break;
@@ -27,7 +36,9 @@ const embeddings: EmbeddingsProvider = {
         }
       }
       if (lastErr) {
-        throw new Error(`Ollama embeddings error: ${lastErr?.message || lastErr}`);
+        throw new Error(
+          `Ollama embeddings error: ${lastErr?.message || lastErr}`
+        );
       }
     }
     return out;
@@ -41,7 +52,7 @@ const chat: ChatProvider = {
       messages,
       temperature: 0.1,
     });
-    return res.choices?.[0]?.message?.content ?? '';
+    return res.choices?.[0]?.message?.content ?? "";
   },
 };
 
