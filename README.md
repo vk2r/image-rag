@@ -110,5 +110,5 @@ La batería de pruebas y resultados se encuentran en el directorio `docs/`:
 
 > - Las respuestas de la batería de pruebas son aproximaciones y pueden variar entre ejecuciones, versiones de modelos o parámetros.
 > - Las preguntas a Ollama tuvieron que realizarse en inglés, debido al tamaño reducido del modelo y a problemas al traducir las preguntas directamente al español.
-> - El tamaño del contexto para Ollama fue ampliado a 16384 tokens para la mayor cantidad de informacion posible. Es posible utilizar 8192 tokens o menos, pero no se se ha verificado.
+> - El tamaño del contexto para Ollama fue ampliado a 16384 tokens para obtener la mayor cantidad de informacion posible. Es posible utilizar 8192 tokens o menos, pero no se se ha verificado.
 > - Para la ejecución completa de los modelos utilizados se requirieron aproximadamente 10 GB de memoria de video (VRAM).
